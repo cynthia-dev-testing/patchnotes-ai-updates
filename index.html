@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7fb">
+  <title>Patchnotes — AI developer tool updates</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1d2030;
+      --muted: #777b8d;
+      --line: #e9eaf0;
+      --surface: #fff;
+      --canvas: #f7f8fb;
+      --purple: #6b5ce7;
+      --purple-soft: #f0edff;
+      --green: #23876c;
+      --shadow: 0 8px 30px rgba(32, 35, 57, .045);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .layout { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
+    aside { position: sticky; top: 0; height: 100vh; padding: 27px 19px; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+    .brand { display: flex; gap: 11px; align-items: center; padding: 2px 9px 31px; font-size: 18px; font-weight: 750; letter-spacing: -.5px; }
+    .brand-icon { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 10px; color: white; background: linear-gradient(140deg, #8978ff, #5948d5); box-shadow: 0 5px 12px #7667e64a; }
+    .eyebrow { color: #a0a3b1; font-size: 10px; font-weight: 750; letter-spacing: 1.15px; text-transform: uppercase; }
+    .side-label { margin: 0 9px 11px; }
+    .nav { display: grid; gap: 4px; margin-bottom: 30px; }
+    .nav button, .tool-button { border: 0; background: transparent; border-radius: 9px; color: #666a7c; text-align: left; }
+    .nav button { padding: 10px 11px; display: flex; justify-content: space-between; align-items: center; }
+    .nav button.active { color: #5345c8; background: var(--purple-soft); font-weight: 650; }
+    .nav .count { color: #a6a8b5; font-size: 11px; }
+    .tool-list { display: grid; gap: 3px; }
+    .tool-button { display: flex; align-items: center; gap: 10px; padding: 8px 9px; font-size: 13px; }
+    .tool-button:hover, .nav button:hover { background: #f6f6fa; }
+    .tool-button.selected { color: var(--ink); }
+    .tool-mark { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; color: #5450ab; background: #f0effb; font-size: 10px; font-weight: 800; }
+    .tool-dot { width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: #d7d9e2; }
+    .tool-button.selected .tool-dot { background: #7868ed; }
+    .side-note { margin-top: auto; padding: 14px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .side-note strong { display: block; color: #434658; font-size: 12px; margin-bottom: 4px; }
+    main { min-width: 0; max-width: 1260px; width: 100%; margin: 0 auto; padding: 36px 48px 60px; }
+    .topline { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
+    .crumb { color: #9699a8; font-size: 12px; }
+    .today { color: #858899; font-size: 12px; }
+    .hero { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; margin-bottom: 26px; }
+    h1 { margin: 0 0 7px; font-size: clamp(29px, 4vw, 37px); line-height: 1.17; letter-spacing: -1.5px; font-weight: 760; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 14px; }
+    .status { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; padding: 8px 11px; background: #fff; border: 1px solid var(--line); border-radius: 9px; color: #737789; font-size: 11px; }
+    .status::before { content: ""; width: 7px; height: 7px; background: #3ab58a; border-radius: 50%; }
+    .summary { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 13px; margin: 27px 0 31px; }
+    .stat { min-height: 93px; padding: 16px 18px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; box-shadow: var(--shadow); }
+    .stat-label { color: var(--muted); font-size: 11px; }
+    .stat-value { display: flex; align-items: baseline; gap: 9px; margin-top: 6px; font-size: 24px; font-weight: 730; letter-spacing: -.7px; }
+    .stat-detail { color: #9699a8; font-size: 10px; font-weight: 450; letter-spacing: 0; }
+    .stat:first-child .stat-value { color: var(--purple); }
+    .toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--line); }
+    .tabs { display: flex; gap: 4px; align-items: center; }
+    .tab { position: relative; border: 0; background: transparent; color: #858899; padding: 8px 11px; font-size: 12px; font-weight: 600; }
+    .tab.active { color: #39334f; }
+    .tab.active::after { content: ""; position: absolute; height: 2px; left: 10px; right: 10px; bottom: -16px; background: var(--purple); border-radius: 3px; }
+    .tab-count { margin-left: 4px; color: #a5a7b3; font-size: 10px; }
+    .filters { display: flex; align-items: center; gap: 8px; }
+    .search, .filter { height: 34px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: #55596b; font-size: 11px; outline: none; }
+    .search { width: 176px; padding: 0 10px; }
+    .filter { padding: 0 9px; }
+    .search:focus, .filter:focus { border-color: #9c91ed; box-shadow: 0 0 0 3px #8778ea18; }
+    .feed-heading { display: flex; justify-content: space-between; align-items: center; padding: 21px 1px 9px; }
+    .feed-heading h2 { margin: 0; font-size: 13px; font-weight: 700; }
+    .feed-heading span { color: #a0a3b0; font-size: 10px; }
+    .feed { display: grid; gap: 11px; }
+    .update { padding: 17px 19px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; box-shadow: var(--shadow); transition: border-color .15s, transform .15s; }
+    .update:hover { border-color: #d6d2f3; transform: translateY(-1px); }
+    .update-top { display: flex; align-items: center; gap: 9px; min-height: 22px; }
+    .update-tool { color: #585b6d; font-size: 11px; font-weight: 680; }
+    .update-date { color: #a0a3b0; font-size: 10px; }
+    .pill { padding: 3px 7px; border-radius: 5px; color: #665ad0; background: #f2f0ff; font-size: 9px; font-weight: 650; }
+    .pill.preview { color: #a66c29; background: #fff5e8; }
+    .update h3 { margin: 8px 0 5px; font-size: 15px; letter-spacing: -.2px; font-weight: 700; }
+    .update p { margin: 0; max-width: 800px; color: #777b8c; font-size: 12px; line-height: 1.65; }
+    .update-bottom { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 13px; }
+    .impact { color: #5b5e70; font-size: 11px; }
+    .impact strong { color: #777b8b; font-weight: 650; }
+    .source { color: #695bdb; text-decoration: none; font-size: 10px; font-weight: 650; white-space: nowrap; }
+    .source:hover { text-decoration: underline; }
+    .empty { padding: 36px 16px; text-align: center; color: var(--muted); border: 1px dashed #dfe0e8; border-radius: 12px; background: #fff; }
+    .footer { margin-top: 22px; color: #a0a3b0; font-size: 10px; line-height: 1.6; }
+    .footer a { color: #777987; }
+    @media (max-width: 900px) { main { padding: 30px 26px 48px; } aside { width: 210px; padding: 23px 13px; } .layout { grid-template-columns: 210px minmax(0,1fr); } .search { width: 145px; } }
+    @media (max-width: 700px) { .layout { display: block; } aside { position: static; width: 100%; height: auto; padding: 13px 17px; border-right: 0; border-bottom: 1px solid var(--line); } .brand { padding: 0 2px; } .side-label, .nav, .side-note { display: none; } .tool-list { display: flex; overflow-x: auto; gap: 4px; padding-top: 12px; } .tool-button { flex: 0 0 auto; padding: 6px 8px; border: 1px solid var(--line); } .tool-dot { display: none; } main { padding: 24px 17px 42px; } .topline { margin-bottom: 25px; } .hero { align-items: flex-start; flex-direction: column; gap: 12px; } .summary { gap: 8px; grid-template-columns: repeat(3,minmax(0,1fr)); margin: 20px 0 23px; } .stat { min-height: 76px; padding: 11px; } .stat-value { font-size: 20px; } .stat-detail { display: none; } .toolbar { align-items: flex-start; flex-direction: column; } .filters { width: 100%; } .search { flex: 1; width: auto; } .filter { max-width: 43%; } }
+    @media (max-width: 420px) { .summary { grid-template-columns: 1fr 1fr; } .summary .stat:first-child { grid-column: span 2; } .update { padding: 14px; } .update-bottom { align-items: flex-start; flex-direction: column; gap: 8px; } .today { font-size: 10px; } }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside aria-label="Dashboard navigation">
+      <div class="brand"><span class="brand-icon">P</span> patchnotes</div>
+      <div class="eyebrow side-label">Your dashboard</div>
+      <nav class="nav" aria-label="Update views">
+        <button class="active" data-view="featured">Worth your attention <span class="count" id="featured-nav-count">05</span></button>
+        <button data-view="all">All updates <span class="count" id="all-nav-count">08</span></button>
+        <button data-view="saved">Following <span class="count" id="following-count">0</span></button>
+      </nav>
+      <div class="eyebrow side-label">Tools <span style="float:right">FOLLOW</span></div>
+      <div class="tool-list" id="tool-list" aria-label="Follow tools"></div>
+      <div class="side-note"><strong>Public by design</strong>Updates link to free, first-party sources. Coverage is selective, not exhaustive.</div>
+    </aside>
+    <main>
+      <div class="topline"><span class="crumb">Dashboard&nbsp; / &nbsp;Updates</span><span class="today">WEDNESDAY, NOVEMBER 4</span></div>
+      <section class="hero">
+        <div><h1>Signals, not noise.</h1><p class="subtitle">The AI coding tool updates worth your time.</p></div>
+        <span class="status">Public sources · Snapshot Nov 4, 2026</span>
+      </section>
+      <section class="summary" aria-label="Update summary">
+        <div class="stat"><div class="stat-label">Worth your attention</div><div class="stat-value"><span id="featured-stat">05</span><span class="stat-detail">curated updates</span></div></div>
+        <div class="stat"><div class="stat-label">Tools covered</div><div class="stat-value">6<span class="stat-detail">and growing</span></div></div>
+        <div class="stat"><div class="stat-label">Your following list</div><div class="stat-value"><span id="following-stat">0</span><span class="stat-detail">tools followed</span></div></div>
+      </section>
+      <section>
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="Choose update feed">
+            <button class="tab active" role="tab" aria-selected="true" data-view="featured">Worth your attention <span class="tab-count">5</span></button>
+            <button class="tab" role="tab" aria-selected="false" data-view="all">All updates <span class="tab-count">8</span></button>
+            <button class="tab" role="tab" aria-selected="false" data-view="saved">Following <span class="tab-count" id="following-tab-count">0</span></button>
+          </div>
+          <div class="filters">
+            <input id="search" class="search" type="search" placeholder="Search updates…" aria-label="Search updates">
+            <select id="category-filter" class="filter" aria-label="Filter by category"><option value="">All categories</option><option>New capability</option><option>Integrations</option><option>Model support</option><option>Developer experience</option><option>Fix</option></select>
+            <select id="date-filter" class="filter" aria-label="Filter by date"><option value="">Any time</option><option value="7">Past week</option><option value="30">Past month</option></select>
+          </div>
+        </div>
+        <div class="feed-heading"><h2 id="feed-title">Worth your attention</h2><span id="result-count"></span></div>
+        <div class="feed" id="feed" aria-live="polite"></div>
+      </section>
+      <div class="footer">Summaries are editorial; availability can vary by plan, platform, or rollout. Check each update’s linked release notes for full details. No paid APIs or accounts required.</div>
+    </main>
+  </div>
+  <script>
+    const tools = ["Cursor", "Claude Code", "Codex", "VS Code", "Devin Desktop", "Cline"];
+    const updates = [
+      { tool: "VS Code", date: "2026-11-04", category: "New capability", title: "Mix agent harnesses in one session", summary: "Nested sessions can now use a different agent harness from their parent, making it easier to get a second opinion without losing the shared session context.", impact: "Useful for comparing agents on the same task.", source: "Release notes", url: "https://code.visualstudio.com/updates/v1_145", featured: true },
+      { tool: "Cursor", date: null, category: "New capability", title: "Remote control for local agents", summary: "See and reply to local agents from the Cursor iOS app; the agent keeps running on your computer, which must stay online.", impact: "Continue a local coding session away from your desk.", source: "Cursor changelog", url: "https://cursor.com/changelog", featured: true },
+      { tool: "Cursor", date: null, category: "Developer experience", title: "Cursor Agent SDK is generally available", summary: "Define agents as code, test them with evals, and deploy to Cursor or your own infrastructure.", impact: "A new path to build and ship custom agents.", source: "Cursor changelog", url: "https://cursor.com/changelog", featured: true },
+      { tool: "Claude Code", date: "2026-11-04", category: "Developer experience", title: "Forked model calls can set effort", summary: "Claude Code v2.1.318 adds an effort option to a forked model call, so short side jobs can use lower effort independently of the session.", impact: "More control over focused sub-tasks.", source: "v2.1.318 release", url: "https://github.com/anthropics/claude-code/releases/tag/v2.1.318", featured: true },
+      { tool: "Codex", date: "2026-10-29", category: "Developer experience", title: "Transcript navigation gets keyboard controls", summary: "Codex CLI 0.166 adds word, line, and page transcript selection, integrated search, and configurable shortcuts.", impact: "Faster navigation through long coding sessions.", source: "Codex releases", url: "https://github.com/openai/codex/releases", featured: true },
+      { tool: "Cline", date: null, category: "New capability", title: "Cloud tasks get a separate model selector", summary: "Choose the model for new cloud sessions independently of local model settings.", impact: "Keep cloud and local workflows configured separately.", source: "Cline releases", url: "https://github.com/cline/cline/releases", featured: false },
+      { tool: "Codex", date: "2026-10-29", category: "Fix", title: "Thread recovery and reconnection fixes", summary: "Recent CLI fixes improve recovery when resuming threads and reconnecting after interruptions.", impact: "More reliable long-running sessions.", source: "Codex releases", url: "https://github.com/openai/codex/releases", featured: false },
+      { tool: "Claude Code", date: "2026-11-04", category: "Fix", title: "Reliability fixes in v2.1.318", summary: "The release fixes session continuation, permission prompts, and configuration writes that could report success when updates failed.", impact: "Worth updating if you hit these workflow issues.", source: "v2.1.318 release", url: "https://github.com/anthropics/claude-code/releases/tag/v2.1.318", featured: false }
+    ];
+    const symbols = { "Cursor": "Cu", "Claude Code": "Cl", "Codex": "Cx", "VS Code": "VS", "Devin Desktop": "De", "Cline": "Ci" };
+    const stored = JSON.parse(localStorage.getItem("patchnotes-following") || "[]");
+    let following = new Set(stored);
+    let view = "featured";
+    let selectedTool = "";
+    const feed = document.querySelector("#feed");
+
+    function renderTools() {
+      document.querySelector("#tool-list").innerHTML = tools.map(tool => `<button class="tool-button ${following.has(tool) ? "selected" : ""}" data-follow="${tool}" aria-pressed="${following.has(tool)}"><span class="tool-mark">${symbols[tool]}</span>${tool}<span class="tool-dot"></span></button>`).join("");
+      document.querySelector("#following-count").textContent = following.size;
+      document.querySelector("#following-stat").textContent = following.size;
+      document.querySelector("#following-tab-count").textContent = following.size;
+    }
+    function render() {
+      const query = document.querySelector("#search").value.trim().toLowerCase();
+      const category = document.querySelector("#category-filter").value;
+      const days = Number(document.querySelector("#date-filter").value || 0);
+      const cutoff = days ? new Date("2026-11-04T23:59:59") : null;
+      if (cutoff) cutoff.setDate(cutoff.getDate() - days);
+      const visible = updates.filter(item => {
+        const inView = view === "featured" ? item.featured : view === "saved" ? following.has(item.tool) : true;
+        const matchesText = !query || `${item.tool} ${item.title} ${item.summary} ${item.category}`.toLowerCase().includes(query);
+        const matchesDate = !cutoff || (item.date && new Date(`${item.date}T00:00:00`) >= cutoff);
+        return inView && (!selectedTool || item.tool === selectedTool) && (!category || item.category === category) && matchesText && matchesDate;
+      });
+      document.querySelector("#feed-title").textContent = view === "saved" ? "Tools you follow" : view === "all" ? "All updates" : "Worth your attention";
+      document.querySelector("#result-count").textContent = `${visible.length} update${visible.length === 1 ? "" : "s"}`;
+      feed.innerHTML = visible.length ? visible.map(item => `<article class="update"><div class="update-top"><span class="update-tool">${item.tool}</span><span class="update-date">${item.date ? new Date(`${item.date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Recent"}</span><span class="pill">${item.category}</span></div><h3>${item.title}</h3><p>${item.summary}</p><div class="update-bottom"><span class="impact"><strong>Why it matters:</strong> ${item.impact}</span><a class="source" href="${item.url}" target="_blank" rel="noreferrer">${item.source} ↗</a></div></article>`).join("") : `<div class="empty">No updates match these filters. Try another tool or category.</div>`;
+    }
+    function setView(next) {
+      view = next;
+      document.querySelectorAll("[data-view]").forEach(button => {
+        const active = button.dataset.view === next;
+        button.classList.toggle("active", active);
+        if (button.getAttribute("role") === "tab") button.setAttribute("aria-selected", String(active));
+      });
+      render();
+    }
+    document.addEventListener("click", event => {
+      const viewButton = event.target.closest("[data-view]");
+      if (viewButton) setView(viewButton.dataset.view);
+      const followButton = event.target.closest("[data-follow]");
+      if (followButton) {
+        const tool = followButton.dataset.follow;
+        if (following.has(tool)) following.delete(tool); else following.add(tool);
+        localStorage.setItem("patchnotes-following", JSON.stringify([...following]));
+        renderTools();
+        render();
+      }
+    });
+    document.querySelector("#search").addEventListener("input", render);
+    document.querySelector("#category-filter").addEventListener("change", render);
+    document.querySelector("#date-filter").addEventListener("change", render);
+    renderTools();
+    render();
+  </script>
+</body>
+</html>
