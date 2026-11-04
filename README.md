@@ -2,6 +2,10 @@
 
 A single-page dashboard for meaningful AI coding-tool updates. It is dependency-free and runs as a static site.
 
+## Live site
+
+<https://cynthia-dev-testing.github.io/patchnotes-ai-updates/>
+
 ## Features
 
 - Curated highlights with short editorial context and links to first-party sources.
@@ -36,7 +40,7 @@ GitHub API limits apply per visitor IP. The dashboard caches successful feed res
 
 ## Free static hosting
 
-`.github/workflows/pages.yml` publishes this static site to GitHub Pages whenever `feature-development` is pushed. GitHub Pages can host public repositories on its free plan. To publish, push this branch to a GitHub repository, enable **Settings → Pages → Build and deployment → GitHub Actions**, and allow the workflow to run. The current local repository has no GitHub remote; publishing requires an authenticated GitHub account and a public repository, which makes the source code public.
+The [public GitHub repository](https://github.com/cynthia-dev-testing/patchnotes-ai-updates) publishes this static site on GitHub Pages. The workflow in `.github/workflows/pages.yml` deploys each push to `feature-development`; the site is served free over HTTPS. The source code is public.
 
 ## Delivery record
 

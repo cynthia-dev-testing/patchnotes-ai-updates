@@ -2,7 +2,7 @@
 
 ## Time spent
 
-**8 minutes 14 seconds** of active implementation, documentation, and local validation. The local Git commit and public deployment are excluded.
+**18 minutes 58 seconds** from the start of development through the initial live deployment and browser verification. The final documentation-only sync and redeployment are excluded from this measurement.
 
 ## Additional work completed
 
@@ -12,7 +12,8 @@
 - Fixed mobile filter overflow and checked both mobile and desktop layouts.
 - Added local run instructions, data-source documentation, and a GitHub Pages deployment workflow on `feature-development`.
 - Verified the page loads locally, all four public APIs return releases, feed/filter/follow interactions work, JavaScript parses, and the mobile layout has no horizontal page overflow.
+- Created the public [`patchnotes-ai-updates` repository](https://github.com/cynthia-dev-testing/patchnotes-ai-updates), enabled Pages, allowed `feature-development` to deploy, and confirmed the published site serves live data successfully.
 
 ## Hosting status
 
-The local dashboard is available at <http://127.0.0.1:4173>. GitHub Pages deployment is prepared but not published: this repository has no remote, and the free Pages setup requires a public repository. Creating one would make the repository source public, so that publication step is waiting for confirmation.
+The live dashboard is at <https://cynthia-dev-testing.github.io/patchnotes-ai-updates/>. The successful Pages deployment ran from `feature-development` at commit `e5108c1`. The local preview remains available at <http://127.0.0.1:4173>.
